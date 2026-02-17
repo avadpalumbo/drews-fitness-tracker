@@ -1,4 +1,4 @@
-const STORAGE_KEY = "drews_fitness_v10";
+const STORAGE_KEY = "drews_tracker_v20";
 const el = (id) => document.getElementById(id);
 
 function todayISO() {
@@ -26,19 +26,12 @@ function render() {
       <td>${entry.title}</td>
       <td>${entry.reps || ""}</td>
       <td>${entry.weight || ""}</td>
-      <td>${entry.distance || ""}</td>
       <td>${entry.minutes || ""}</td>
+      <td>${entry.miles || ""}</td>
       <td>${entry.notes || ""}</td>
     `;
     tbody.appendChild(row);
   });
-}
-
-function addEntry(entry) {
-  const data = load();
-  data.push(entry);
-  save(data);
-  render();
 }
 
 document.addEventListener("click", (e) => {
@@ -46,12 +39,19 @@ document.addEventListener("click", (e) => {
     const target = e.target.dataset.target;
     const step = parseFloat(e.target.dataset.step);
     const input = el(target);
-    const current = parseFloat(input.value) || 0;
-    let next = current + step;
-    if (next < 0) next = 0;
-    input.value = next.toFixed(input.step.includes(".") ? 1 : 0);
+    let val = parseFloat(input.value) || 0;
+    val += step;
+    if (val < 0) val = 0;
+    input.value = input.step.includes(".") ? val.toFixed(1) : Math.round(val);
   }
 });
+
+function addEntry(entry) {
+  const data = load();
+  data.push(entry);
+  save(data);
+  render();
+}
 
 function saveWorkout() {
   const date = el("workoutDate").value || todayISO();
@@ -74,7 +74,7 @@ function saveCardio() {
     type: "Cardio",
     title: "Walk",
     minutes: el("cardioMinutes").value,
-    distance: el("cardioMiles").value,
+    miles: el("cardioMiles").value,
     notes: el("cardioNotes").value
   });
 }
@@ -90,15 +90,15 @@ function saveFastedWeight() {
 
 function exportData() {
   const data = load();
-  let text = "Drew's Fitness Tracker Export\n\n";
+  let text = "Drew’s Fitness Tracker Export\n\n";
   data.forEach((e, i) => {
     text += `Entry ${i+1}\nDate: ${e.date}\nType: ${e.type}\nTitle: ${e.title}\n`;
     if (e.reps) text += `Reps: ${e.reps}\n`;
     if (e.weight) text += `Weight: ${e.weight}\n`;
     if (e.minutes) text += `Minutes: ${e.minutes}\n`;
-    if (e.distance) text += `Distance: ${e.distance}\n`;
+    if (e.miles) text += `Miles: ${e.miles}\n`;
     if (e.notes) text += `Notes: ${e.notes}\n`;
-    text += "------------------\n";
+    text += "-------------------\n";
   });
   el("exportBox").value = text;
 }
