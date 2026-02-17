@@ -1,129 +1,63 @@
-
 body {
   font-family: Arial, sans-serif;
-  background-color: #0f172a;
-  color: white;
-  padding: 20px;
-  max-width: 980px;
-  margin: 0 auto;
+  margin: 20px;
+  background: #f4f6f8;
 }
 
-h1 { text-align: center; }
+h1 {
+  text-align: center;
+}
 
 .card {
-  background: #1e293b;
-  padding: 18px;
-  margin: 16px 0;
-  border-radius: 12px;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  font-size: 16px;
+  background: white;
+  padding: 15px;
+  margin-bottom: 20px;
   border-radius: 10px;
-  border: none;
-  background-color: #2563eb;
-  color: white;
-  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
-
-button:hover { background-color: #1d4ed8; }
-
-input, textarea, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
-  border: none;
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.rowTight {
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap: wrap;
-}
-
-.grid2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.field { flex: 1; min-width: 180px; }
 
 .stepper {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 8px;
+  margin: 8px 0;
 }
 
-.btn {
-  width: 52px;
-  background: #334155;
-  border-radius: 10px;
-}
-
-.valueBox {
-  flex: 1;
+.stepper input {
+  width: 80px;
   text-align: center;
-  padding: 10px 12px;
-  background: #0b1220;
-  border-radius: 10px;
-  border: 1px solid #334155;
+  font-size: 16px;
 }
 
-.valueMini {
-  font-size: 13px;
-  color: #cbd5e1;
+.step-btn {
+  padding: 6px 12px;
+  font-size: 18px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #e9ecef;
 }
 
-.checkRow {
+.exercise {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  margin: 10px 0;
+}
+
+table {
+  width: 100%;
+  background: white;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+textarea {
+  width: 100%;
   margin-top: 10px;
-}
-
-.calTable { margin-top: 12px; }
-
-.calRow {
-  display: grid;
-  grid-template-columns: 1.6fr 1.2fr 0.9fr 1.3fr;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #334155;
-}
-
-.calName { font-weight: bold; }
-
-.miniCheck {
-  display:flex;
-  align-items:center;
-  gap:8px;
   font-size: 14px;
-}
-
-.wBox { display: none; }
-
-.chipBtn {
-  width: auto;
-  padding: 8px 12px;
-  background: #0b1220;
-  border: 1px solid #334155;
-  border-radius: 999px;
-}
-
-.chipBtn:hover {
-  background: #111827;
 }
