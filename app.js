@@ -1,180 +1,251 @@
-let logs = [];
+// Drew’s Fitness Tracker — app.js
+// Persists entries in localStorage + Export/Copy for paste-to-chat
 
-window.onload = function () {
-  document.getElementById("status").textContent = "App Loaded Successfully ✅";
-  document.getElementById("date").valueAsDate = new Date();
+const STORAGE_KEY = "drews_fitness_entries_v1";
 
-  // Wire main buttons
-  document.getElementById("gtgBtn").onclick = addGTG;
-  document.getElementById("cardioBtn").onclick = addCardio;
-  document.getElementById("ruckBtn").onclick = addRuck;
-  document.getElementById("calisBtn").onclick = addCalisthenics;
-  document.getElementById("weightBtn").onclick = addWeight;
-  document.getElementById("exportBtn").onclick = exportLog;
+const el = (id) => document.getElementById(id);
 
-  // Stepper buttons
-  document.querySelectorAll("[data-step-target]").forEach(btn => {
+const dateInput = el("dateInput");
+const typeInput = el("typeInput");
+const titleInput = el("titleInput");
+const repsInput = el("repsInput");
+const weightInput = el("weightInput");
+const distanceInput = el("distanceInput");
+const durationInput = el("durationInput");
+const notesInput = el("notesInput");
+
+const addBtn = el("addBtn");
+const clearBtn = el("clearBtn");
+const statusMsg = el("statusMsg");
+
+const entriesTbody = el("entriesTbody");
+const deleteAllBtn = el("deleteAllBtn");
+
+const exportBtn = el("exportBtn");
+const copyBtn = el("copyBtn");
+const exportBox = el("exportBox");
+const copyMsg = el("copyMsg");
+
+function todayISO() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function loadEntries() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveEntries(entries) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+function escapeText(s) {
+  return String(s ?? "").replace(/[<>&]/g, (c) => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c]));
+}
+
+function setStatus(msg) {
+  if (!statusMsg) return;
+  statusMsg.textContent = msg;
+  setTimeout(() => {
+    if (statusMsg.textContent === msg) statusMsg.textContent = "";
+  }, 2500);
+}
+
+function setCopyMsg(msg) {
+  if (!copyMsg) return;
+  copyMsg.textContent = msg;
+  setTimeout(() => {
+    if (copyMsg.textContent === msg) copyMsg.textContent = "";
+  }, 2500);
+}
+
+function renderEntries() {
+  const entries = loadEntries()
+    .slice()
+    .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
+
+  if (!entriesTbody) return;
+  entriesTbody.innerHTML = "";
+
+  for (const entry of entries) {
+    const tr = document.createElement("tr");
+
+    const cells = [
+      entry.date || "",
+      entry.type || "",
+      entry.title || "",
+      entry.reps ?? "",
+      entry.weight ?? "",
+      entry.distance ?? "",
+      entry.duration ?? "",
+      entry.notes || ""
+    ];
+
+    for (const v of cells) {
+      const td = document.createElement("td");
+      td.innerHTML = escapeText(v);
+      tr.appendChild(td);
+    }
+
+    const tdDelete = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "Delete";
+    btn.className = "ghost";
     btn.addEventListener("click", () => {
-      const targetId = btn.getAttribute("data-step-target");
-      const step = parseFloat(btn.getAttribute("data-step"));
-      stepValue(targetId, step);
+      const all = loadEntries();
+      const next = all.filter((x) => x.id !== entry.id);
+      saveEntries(next);
+      renderEntries();
+      setStatus("Entry deleted.");
     });
-  });
+    tdDelete.appendChild(btn);
+    tr.appendChild(tdDelete);
 
-  // Weighted checkbox toggles (show/hide weight steppers)
-  document.querySelectorAll(".wCheck").forEach(cb => {
-    cb.addEventListener("change", () => {
-      const wtarget = cb.getAttribute("data-wtarget"); // e.g. cal_dips_w
-      const box = document.getElementById(wtarget + "_box");
-      if (box) box.style.display = cb.checked ? "flex" : "none";
-      // If unchecked, reset weight to 0
-      if (!cb.checked) {
-        const wEl = document.getElementById(wtarget);
-        if (wEl) wEl.textContent = "0";
-      }
-    });
-  });
-
-  // DB curl weight chip buttons
-  document.querySelectorAll("[data-set='cal_curls_w']").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const v = btn.getAttribute("data-value");
-      document.getElementById("cal_curls_w").textContent = v;
-    });
-  });
-
-  renderLogs();
-};
-
-function getNum(id) {
-  return parseFloat(document.getElementById(id).textContent);
+    entriesTbody.appendChild(tr);
+  }
 }
 
-function stepValue(id, step) {
-  const el = document.getElementById(id);
-  if (!el) return;
+function clearForm() {
+  typeInput && (typeInput.value = "Fasted Weight");
+  titleInput && (titleInput.value = "");
+  repsInput && (repsInput.value = "");
+  weightInput && (weightInput.value = "");
+  distanceInput && (distanceInput.value = "");
+  durationInput && (durationInput.value = "");
+  notesInput && (notesInput.value = "");
+}
 
-  let v = parseFloat(el.textContent);
-  if (isNaN(v)) v = 0;
-  v = v + step;
+function addEntry() {
+  const date = dateInput?.value || todayISO();
+  const type = typeInput?.value || "Note";
+  const title = (titleInput?.value || "").trim();
 
-  // Guardrails
-  if (id.includes("Incline") || id.includes("Speed")) {
-    v = Math.max(0, Math.min(15, v));
-    v = Math.round(v * 2) / 2; // keep .5
-    el.textContent = v.toFixed(1);
+  const repsVal = repsInput?.value;
+  const weightVal = weightInput?.value;
+  const distanceVal = distanceInput?.value;
+  const durationVal = durationInput?.value;
+  const notes = (notesInput?.value || "").trim();
+
+  // Basic validation: require at least a title OR notes OR some numeric field
+  const hasNumeric = [repsVal, weightVal, distanceVal, durationVal].some((v) => v !== "" && v != null);
+  if (!title && !notes && !hasNumeric) {
+    setStatus("Add at least a Title, Notes, or a number (reps/weight/distance/minutes).");
     return;
   }
 
-  if (id.includes("Dist")) {
-    v = Math.max(0, v);
-    el.textContent = v.toFixed(2);
-    return;
-  }
+  const entry = {
+    id: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+    createdAt: Date.now(),
+    date,
+    type,
+    title,
+    reps: repsVal === "" ? null : Number(repsVal),
+    weight: weightVal === "" ? null : Number(weightVal),
+    distance: distanceVal === "" ? null : Number(distanceVal),
+    duration: durationVal === "" ? null : Number(durationVal),
+    notes
+  };
 
-  if (id === "fastedWeight") {
-    v = Math.max(0, v);
-    el.textContent = v.toFixed(1);
-    return;
-  }
+  const entries = loadEntries();
+  entries.push(entry);
+  saveEntries(entries);
 
-  // reps / minutes / load (integers mostly)
-  if (id.includes("Load")) {
-    v = Math.max(0, v);
-    el.textContent = Math.round(v).toString();
-    return;
-  }
-
-  v = Math.max(0, v);
-  el.textContent = Math.round(v).toString();
+  renderEntries();
+  clearForm();
+  setStatus("Saved ✅");
 }
 
-function addGTG() {
-  const reps = getNum("gtgDefault");
-  const feel = document.getElementById("gtgFeel").value;
-
-  logs.push(`GTG Chin-ups: ${reps} reps (dead hang, chest-to-bar, controlled) | Feel: ${feel}`);
-  renderLogs();
-}
-
-function addCardio() {
-  const min = getNum("cardioMin");
-  const incline = getNum("cardioIncline").toFixed(1);
-  const speed = getNum("cardioSpeed").toFixed(1);
-  const dist = getNum("cardioDist").toFixed(2);
-  const cooldown = document.getElementById("cardioCooldown").checked;
-
-  logs.push(
-    `Cardio Walk: ${min} min | Incline ${incline}${cooldown ? " (cooldown ramp-down)" : ""} | Speed ${speed}${cooldown ? " (ramp-down)" : ""} | Distance ${dist} mi | Hands Free`
-  );
-  renderLogs();
-}
-
-function addRuck() {
-  const min = getNum("ruckMin");
-  const incline = getNum("ruckIncline").toFixed(1);
-  const speed = getNum("ruckSpeed").toFixed(1);
-  const dist = getNum("ruckDist").toFixed(2);
-  const load = getNum("ruckLoad");
-
-  logs.push(
-    `Ruck Walk: ${min} min | Incline ${incline} | Speed ${speed} | Distance ${dist} mi | Load ${load} lb Backpack | Hands Free`
-  );
-  renderLogs();
-}
-
-function addCalisthenics() {
-  const toFailure = document.getElementById("calToFailure").checked ? "Yes" : "No";
+function generateExportText() {
+  const entries = loadEntries()
+    .slice()
+    .sort((a, b) => (a.date || "").localeCompare(b.date || "") || (a.createdAt || 0) - (b.createdAt || 0));
 
   const lines = [];
+  lines.push("Drew’s Fitness Tracker — Export");
+  lines.push(`Generated: ${todayISO()}`);
+  lines.push(`Entries: ${entries.length}`);
+  lines.push("");
 
-  function addLine(name, repsId, wId) {
-    const reps = getNum(repsId);
-    const w = getNum(wId);
-    if (w > 0) lines.push(`${name}: ${reps} reps (+${w} lb)`);
-    else lines.push(`${name}: ${reps} reps`);
+  for (const e of entries) {
+    const parts = [];
+    parts.push(`Date: ${e.date || ""}`);
+    parts.push(`Type: ${e.type || ""}`);
+    if (e.title) parts.push(`Title: ${e.title}`);
+    if (e.reps != null) parts.push(`Reps: ${e.reps}`);
+    if (e.weight != null) parts.push(`Weight(lbs): ${e.weight}`);
+    if (e.distance != null) parts.push(`Distance(mi): ${e.distance}`);
+    if (e.duration != null) parts.push(`Minutes: ${e.duration}`);
+    if (e.notes) parts.push(`Notes: ${e.notes}`);
+    lines.push(parts.join(" | "));
   }
 
-  addLine("Chin-ups", "cal_chins", "cal_chins_w");
-  addLine("Dips", "cal_dips", "cal_dips_w");
-  addLine("Parallette push-ups", "cal_ppush", "cal_ppush_w");
-  addLine("Incline parallette push-ups", "cal_ippush", "cal_ippush_w");
-  addLine("Rows (feet elevated)", "cal_rows_e", "cal_rows_e_w");
-  addLine("Rows (feet on floor)", "cal_rows_f", "cal_rows_f_w");
-  addLine("Squats", "cal_squats", "cal_squats_w");
-  addLine("Hanging knee raises", "cal_knees", "cal_knees_w");
-
-  const curlsReps = getNum("cal_curls");
-  const curlsW = document.getElementById("cal_curls_w").textContent;
-  lines.push(`DB curls: ${curlsReps} reps (${curlsW} lb, mixed hammer + alternating)`);
-
-  const session = `Calisthenics Session (to failure: ${toFailure}):\n- ` + lines.join("\n- ");
-  logs.push(session);
-
-  renderLogs();
+  return lines.join("\n");
 }
 
-function addWeight() {
-  const w = getNum("fastedWeight").toFixed(1);
-  logs.push(`Fasted Weight: ${w} lb`);
-  renderLogs();
+async function copyExport() {
+  const text = exportBox?.value || "";
+  if (!text.trim()) {
+    setCopyMsg("Nothing to copy. Tap Generate Export first.");
+    return;
+  }
+
+  // Prefer clipboard API
+  try {
+    await navigator.clipboard.writeText(text);
+    setCopyMsg("Copied ✅ Now paste into chat.");
+    return;
+  } catch {
+    // Fallback
+    exportBox.focus();
+    exportBox.select();
+    const ok = document.execCommand("copy");
+    setCopyMsg(ok ? "Copied ✅ Now paste into chat." : "Copy failed — press and hold → Copy.");
+  }
 }
 
-function renderLogs() {
-  const list = document.getElementById("entries");
-  list.innerHTML = "";
-  logs.forEach(entry => {
-    const li = document.createElement("li");
-    li.textContent = entry;
-    list.appendChild(li);
+function deleteAll() {
+  const ok = confirm("Delete ALL entries? This cannot be undone.");
+  if (!ok) return;
+  localStorage.removeItem(STORAGE_KEY);
+  renderEntries();
+  if (exportBox) exportBox.value = "";
+  setStatus("All entries deleted.");
+}
+
+// Wire up
+document.addEventListener("DOMContentLoaded", () => {
+  if (dateInput) dateInput.value = todayISO();
+
+  addBtn?.addEventListener("click", addEntry);
+  clearBtn?.addEventListener("click", () => {
+    clearForm();
+    setStatus("Cleared.");
   });
-}
 
-function exportLog() {
-  const date = document.getElementById("date").value;
-  const exportText = `Workout Log Export\nDate: ${date}\n\n` + logs.join("\n\n");
-  document.getElementById("exportBox").value = exportText;
-}
+  deleteAllBtn?.addEventListener("click", deleteAll);
+
+  exportBtn?.addEventListener("click", () => {
+    const txt = generateExportText();
+    if (exportBox) exportBox.value = txt;
+    setCopyMsg("Export generated. Tap Copy Export.");
+  });
+
+  copyBtn?.addEventListener("click", copyExport);
+
+  // Initial render from storage
+  renderEntries();
+});
+
 
 
 
