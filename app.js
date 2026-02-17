@@ -1,8 +1,4 @@
-
-// ===== Drew’s Fitness Tracker =====
-// Full save + export + universal +/- stepper support
-
-const STORAGE_KEY = "drews_fitness_entries_v2";
+const STORAGE_KEY = "drews_fitness_entries_v3";
 
 const el = (id) => document.getElementById(id);
 
@@ -11,12 +7,8 @@ function todayISO() {
 }
 
 function loadEntries() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+  const raw = localStorage.getItem(STORAGE_KEY);
+  return raw ? JSON.parse(raw) : [];
 }
 
 function saveEntries(entries) {
@@ -25,44 +17,40 @@ function saveEntries(entries) {
 
 function renderEntries() {
   const tbody = el("entriesTbody");
-  if (!tbody) return;
-
   tbody.innerHTML = "";
   const entries = loadEntries();
 
   entries.forEach((entry, index) => {
     const row = document.createElement("tr");
-
     row.innerHTML = `
-      <td>${entry.date || ""}</td>
-      <td>${entry.type || ""}</td>
-      <td>${entry.title || ""}</td>
-      <td>${entry.reps || ""}</td>
-      <td>${entry.weight || ""}</td>
-      <td>${entry.distance || ""}</td>
-      <td>${entry.duration || ""}</td>
-      <td>${entry.notes || ""}</td>
-      <td><button type="button" data-delete="${index}">Delete</button></td>
+      <td>${entry.date}</td>
+      <td>${entry.type}</td>
+      <td>${entry.title}</td>
+      <td>${entry.reps}</td>
+      <td>${entry.weight}</td>
+      <td>${entry.distance}</td>
+      <td>${entry.duration}</td>
+      <td>${entry.notes}</td>
+      <td><button onclick="deleteEntry(${index})">X</button></td>
     `;
-
     tbody.appendChild(row);
   });
 }
 
 function addEntry() {
   const entry = {
-    date: el("dateInput")?.value || todayISO(),
-    type: el("typeInput")?.value || "",
-    title: el("titleInput")?.value || "",
-    reps: el("repsInput")?.value || "",
-    weight: el("weightInput")?.value || "",
-    distance: el("distanceInput")?.value || "",
-    duration: el("durationInput")?.value || "",
-    notes: el("notesInput")?.value || ""
+    date: el("dateInput").value || todayISO(),
+    type: el("typeInput").value,
+    title: el("titleInput").value,
+    reps: el("repsInput").value,
+    weight: el("weightInput").value,
+    distance: el("distanceInput").value,
+    duration: el("durationInput").value,
+    notes: el("notesInput").value
   };
 
   if (!entry.title && !entry.reps && !entry.notes) {
-    alert("Add at least a title, reps, or notes.");
+    alert("Add a title, reps, or notes.");
     return;
   }
 
@@ -81,9 +69,8 @@ function deleteEntry(index) {
 
 function generateExport() {
   const entries = loadEntries();
-
   let text = "Drew’s Fitness Tracker Export\n";
-  text += "Generated: " + todayISO() + "\n";
+  text += "Date: " + todayISO() + "\n";
   text += "Total Entries: " + entries.length + "\n\n";
 
   entries.forEach((e, i) => {
@@ -96,7 +83,7 @@ function generateExport() {
     text += `Distance: ${e.distance}\n`;
     text += `Duration: ${e.duration}\n`;
     text += `Notes: ${e.notes}\n`;
-    text += "--------------------------\n";
+    text += "----------------------\n";
   });
 
   el("exportBox").value = text;
@@ -106,47 +93,34 @@ function copyExport() {
   const box = el("exportBox");
   box.select();
   document.execCommand("copy");
-  alert("Copied! Now paste into ChatGPT.");
+  alert("Copied! Paste into ChatGPT.");
 }
 
-// ===== UNIVERSAL +/- STEPPER SUPPORT =====
-// Works with buttons like:
-// <button class="step-btn" data-target="repsInput" data-step="1">+</button>
-// <button class="step-btn" data-target="repsInput" data-step="-1">-</button>
-
+// UNIVERSAL + / - BUTTON HANDLER
 document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".step-btn");
-  if (btn) {
-    const targetId = btn.getAttribute("data-target");
-    const step = parseFloat(btn.getAttribute("data-step") || "0");
-    const input = document.getElementById(targetId);
-    if (!input || !Number.isFinite(step)) return;
+  if (e.target.classList.contains("step-btn")) {
+    const targetId = e.target.getAttribute("data-target");
+    const step = parseFloat(e.target.getAttribute("data-step"));
+    const input = el(targetId);
+    if (!input) return;
 
-    const current = parseFloat(input.value);
-    const val = Number.isFinite(current) ? current : 0;
+    const current = parseFloat(input.value) || 0;
+    const min = parseFloat(input.min) || 0;
+    let next = current + step;
+    if (next < min) next = min;
 
-    const min = input.min !== "" ? parseFloat(input.min) : -Infinity;
-    const next = Math.max(min, val + step);
-
-    const stepAttr = parseFloat(input.step || "1");
-    const decimals = stepAttr < 1 ? (String(stepAttr).split(".")[1]?.length || 0) : 0;
-
-    input.value = decimals ? next.toFixed(decimals) : Math.round(next);
-    return;
-  }
-
-  // Delete handler
-  if (e.target.dataset.delete !== undefined) {
-    deleteEntry(parseInt(e.target.dataset.delete));
+    input.value = next.toFixed(
+      input.step && input.step.includes(".")
+        ? input.step.split(".")[1].length
+        : 0
+    );
   }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  el("dateInput").value = todayISO();
+  el("addBtn").addEventListener("click", addEntry);
+  el("exportBtn").addEventListener("click", generateExport);
+  el("copyBtn").addEventListener("click", copyExport);
   renderEntries();
-
-  el("addBtn")?.addEventListener("click", addEntry);
-  el("exportBtn")?.addEventListener("click", generateExport);
-  el("copyBtn")?.addEventListener("click", copyExport);
 });
-
-
