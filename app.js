@@ -1,45 +1,18 @@
-// Drew’s Fitness Tracker — app.js
-// Persists entries in localStorage + Export/Copy for paste-to-chat
+// ===== Drew’s Fitness Tracker =====
+// Full save + export + universal +/- stepper support
 
-const STORAGE_KEY = "drews_fitness_entries_v1";
+const STORAGE_KEY = "drews_fitness_entries_v2";
 
 const el = (id) => document.getElementById(id);
 
-const dateInput = el("dateInput");
-const typeInput = el("typeInput");
-const titleInput = el("titleInput");
-const repsInput = el("repsInput");
-const weightInput = el("weightInput");
-const distanceInput = el("distanceInput");
-const durationInput = el("durationInput");
-const notesInput = el("notesInput");
-
-const addBtn = el("addBtn");
-const clearBtn = el("clearBtn");
-const statusMsg = el("statusMsg");
-
-const entriesTbody = el("entriesTbody");
-const deleteAllBtn = el("deleteAllBtn");
-
-const exportBtn = el("exportBtn");
-const copyBtn = el("copyBtn");
-const exportBox = el("exportBox");
-const copyMsg = el("copyMsg");
-
 function todayISO() {
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
+  return new Date().toISOString().split("T")[0];
 }
 
 function loadEntries() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
@@ -49,243 +22,128 @@ function saveEntries(entries) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
-function escapeText(s) {
-  return String(s ?? "").replace(/[<>&]/g, (c) => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c]));
-}
-
-function setStatus(msg) {
-  if (!statusMsg) return;
-  statusMsg.textContent = msg;
-  setTimeout(() => {
-    if (statusMsg.textContent === msg) statusMsg.textContent = "";
-  }, 2500);
-}
-
-function setCopyMsg(msg) {
-  if (!copyMsg) return;
-  copyMsg.textContent = msg;
-  setTimeout(() => {
-    if (copyMsg.textContent === msg) copyMsg.textContent = "";
-  }, 2500);
-}
-
 function renderEntries() {
-  const entries = loadEntries()
-    .slice()
-    .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
+  const tbody = el("entriesTbody");
+  if (!tbody) return;
 
-  if (!entriesTbody) return;
-  entriesTbody.innerHTML = "";
+  tbody.innerHTML = "";
+  const entries = loadEntries();
 
-  for (const entry of entries) {
-    const tr = document.createElement("tr");
+  entries.forEach((entry, index) => {
+    const row = document.createElement("tr");
 
-    const cells = [
-      entry.date || "",
-      entry.type || "",
-      entry.title || "",
-      entry.reps ?? "",
-      entry.weight ?? "",
-      entry.distance ?? "",
-      entry.duration ?? "",
-      entry.notes || ""
-    ];
+    row.innerHTML = `
+      <td>${entry.date || ""}</td>
+      <td>${entry.type || ""}</td>
+      <td>${entry.title || ""}</td>
+      <td>${entry.reps || ""}</td>
+      <td>${entry.weight || ""}</td>
+      <td>${entry.distance || ""}</td>
+      <td>${entry.duration || ""}</td>
+      <td>${entry.notes || ""}</td>
+      <td><button type="button" data-delete="${index}">Delete</button></td>
+    `;
 
-    for (const v of cells) {
-      const td = document.createElement("td");
-      td.innerHTML = escapeText(v);
-      tr.appendChild(td);
-    }
-
-    const tdDelete = document.createElement("td");
-    const btn = document.createElement("button");
-    btn.textContent = "Delete";
-    btn.className = "ghost";
-    btn.addEventListener("click", () => {
-      const all = loadEntries();
-      const next = all.filter((x) => x.id !== entry.id);
-      saveEntries(next);
-      renderEntries();
-      setStatus("Entry deleted.");
-    });
-    tdDelete.appendChild(btn);
-    tr.appendChild(tdDelete);
-
-    entriesTbody.appendChild(tr);
-  }
-}
-
-function clearForm() {
-  typeInput && (typeInput.value = "Fasted Weight");
-  titleInput && (titleInput.value = "");
-  repsInput && (repsInput.value = "");
-  weightInput && (weightInput.value = "");
-  distanceInput && (distanceInput.value = "");
-  durationInput && (durationInput.value = "");
-  notesInput && (notesInput.value = "");
+    tbody.appendChild(row);
+  });
 }
 
 function addEntry() {
-  const date = dateInput?.value || todayISO();
-  const type = typeInput?.value || "Note";
-  const title = (titleInput?.value || "").trim();
+  const entry = {
+    date: el("dateInput")?.value || todayISO(),
+    type: el("typeInput")?.value || "",
+    title: el("titleInput")?.value || "",
+    reps: el("repsInput")?.value || "",
+    weight: el("weightInput")?.value || "",
+    distance: el("distanceInput")?.value || "",
+    duration: el("durationInput")?.value || "",
+    notes: el("notesInput")?.value || ""
+  };
 
-  const repsVal = repsInput?.value;
-  const weightVal = weightInput?.value;
-  const distanceVal = distanceInput?.value;
-  const durationVal = durationInput?.value;
-  const notes = (notesInput?.value || "").trim();
-
-  // Basic validation: require at least a title OR notes OR some numeric field
-  const hasNumeric = [repsVal, weightVal, distanceVal, durationVal].some((v) => v !== "" && v != null);
-  if (!title && !notes && !hasNumeric) {
-    setStatus("Add at least a Title, Notes, or a number (reps/weight/distance/minutes).");
+  if (!entry.title && !entry.reps && !entry.notes) {
+    alert("Add at least a title, reps, or notes.");
     return;
   }
-
-  const entry = {
-    id: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
-    createdAt: Date.now(),
-    date,
-    type,
-    title,
-    reps: repsVal === "" ? null : Number(repsVal),
-    weight: weightVal === "" ? null : Number(weightVal),
-    distance: distanceVal === "" ? null : Number(distanceVal),
-    duration: durationVal === "" ? null : Number(durationVal),
-    notes
-  };
 
   const entries = loadEntries();
   entries.push(entry);
   saveEntries(entries);
-
   renderEntries();
-  clearForm();
-  setStatus("Saved ✅");
 }
 
-function generateExportText() {
-  const entries = loadEntries()
-    .slice()
-    .sort((a, b) => (a.date || "").localeCompare(b.date || "") || (a.createdAt || 0) - (b.createdAt || 0));
-
-  const lines = [];
-  lines.push("Drew’s Fitness Tracker — Export");
-  lines.push(`Generated: ${todayISO()}`);
-  lines.push(`Entries: ${entries.length}`);
-  lines.push("");
-
-  for (const e of entries) {
-    const parts = [];
-    parts.push(`Date: ${e.date || ""}`);
-    parts.push(`Type: ${e.type || ""}`);
-    if (e.title) parts.push(`Title: ${e.title}`);
-    if (e.reps != null) parts.push(`Reps: ${e.reps}`);
-    if (e.weight != null) parts.push(`Weight(lbs): ${e.weight}`);
-    if (e.distance != null) parts.push(`Distance(mi): ${e.distance}`);
-    if (e.duration != null) parts.push(`Minutes: ${e.duration}`);
-    if (e.notes) parts.push(`Notes: ${e.notes}`);
-    lines.push(parts.join(" | "));
-  }
-
-  return lines.join("\n");
+function deleteEntry(index) {
+  const entries = loadEntries();
+  entries.splice(index, 1);
+  saveEntries(entries);
+  renderEntries();
 }
 
-async function copyExport() {
-  const text = exportBox?.value || "";
-  if (!text.trim()) {
-    setCopyMsg("Nothing to copy. Tap Generate Export first.");
+function generateExport() {
+  const entries = loadEntries();
+
+  let text = "Drew’s Fitness Tracker Export\n";
+  text += "Generated: " + todayISO() + "\n";
+  text += "Total Entries: " + entries.length + "\n\n";
+
+  entries.forEach((e, i) => {
+    text += `Entry ${i + 1}\n`;
+    text += `Date: ${e.date}\n`;
+    text += `Type: ${e.type}\n`;
+    text += `Title: ${e.title}\n`;
+    text += `Reps: ${e.reps}\n`;
+    text += `Weight: ${e.weight}\n`;
+    text += `Distance: ${e.distance}\n`;
+    text += `Duration: ${e.duration}\n`;
+    text += `Notes: ${e.notes}\n`;
+    text += "--------------------------\n";
+  });
+
+  el("exportBox").value = text;
+}
+
+function copyExport() {
+  const box = el("exportBox");
+  box.select();
+  document.execCommand("copy");
+  alert("Copied! Now paste into ChatGPT.");
+}
+
+// ===== UNIVERSAL +/- STEPPER SUPPORT =====
+// Works with buttons like:
+// <button class="step-btn" data-target="repsInput" data-step="1">+</button>
+// <button class="step-btn" data-target="repsInput" data-step="-1">-</button>
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".step-btn");
+  if (btn) {
+    const targetId = btn.getAttribute("data-target");
+    const step = parseFloat(btn.getAttribute("data-step") || "0");
+    const input = document.getElementById(targetId);
+    if (!input || !Number.isFinite(step)) return;
+
+    const current = parseFloat(input.value);
+    const val = Number.isFinite(current) ? current : 0;
+
+    const min = input.min !== "" ? parseFloat(input.min) : -Infinity;
+    const next = Math.max(min, val + step);
+
+    const stepAttr = parseFloat(input.step || "1");
+    const decimals = stepAttr < 1 ? (String(stepAttr).split(".")[1]?.length || 0) : 0;
+
+    input.value = decimals ? next.toFixed(decimals) : Math.round(next);
     return;
   }
 
-  // Prefer clipboard API
-  try {
-    await navigator.clipboard.writeText(text);
-    setCopyMsg("Copied ✅ Now paste into chat.");
-    return;
-  } catch {
-    // Fallback
-    exportBox.focus();
-    exportBox.select();
-    const ok = document.execCommand("copy");
-    setCopyMsg(ok ? "Copied ✅ Now paste into chat." : "Copy failed — press and hold → Copy.");
+  // Delete handler
+  if (e.target.dataset.delete !== undefined) {
+    deleteEntry(parseInt(e.target.dataset.delete));
   }
-}
-
-function deleteAll() {
-  const ok = confirm("Delete ALL entries? This cannot be undone.");
-  if (!ok) return;
-  localStorage.removeItem(STORAGE_KEY);
-  renderEntries();
-  if (exportBox) exportBox.value = "";
-  setStatus("All entries deleted.");
-}
-
-// Wire up
-document.addEventListener("DOMContentLoaded", () => {
-  if (dateInput) dateInput.value = todayISO();
-
-  addBtn?.addEventListener("click", addEntry);
-  clearBtn?.addEventListener("click", () => {
-    clearForm();
-    setStatus("Cleared.");
-  });
-
-  deleteAllBtn?.addEventListener("click", deleteAll);
-
-  exportBtn?.addEventListener("click", () => {
-    const txt = generateExportText();
-    if (exportBox) exportBox.value = txt;
-    setCopyMsg("Export generated. Tap Copy Export.");
-  });
-
-  copyBtn?.addEventListener("click", copyExport);
-
-  // Initial render from storage
-  renderEntries();
-});
-// --- Stepper buttons (+ / -) support ---
-// This will make + and - buttons work if they have ids like:
-// repsPlus / repsMinus, weightPlus / weightMinus, distancePlus / distanceMinus, durationPlus / durationMinus
-
-function wireStepper(minusId, plusId, inputId, step = 1, min = 0) {
-  const minusBtn = document.getElementById(minusId);
-  const plusBtn = document.getElementById(plusId);
-  const input = document.getElementById(inputId);
-
-  if (!minusBtn || !plusBtn || !input) return; // silently skip if not present
-
-  // Important: prevent buttons from submitting forms or reloading page
-  minusBtn.type = "button";
-  plusBtn.type = "button";
-
-  const getVal = () => {
-    const v = parseFloat(input.value);
-    return Number.isFinite(v) ? v : 0;
-  };
-
-  minusBtn.addEventListener("click", () => {
-    const next = Math.max(min, getVal() - step);
-    input.value = (step % 1 === 0) ? String(next) : String(Number(next.toFixed(3)));
-  });
-
-  plusBtn.addEventListener("click", () => {
-    const next = getVal() + step;
-    input.value = (step % 1 === 0) ? String(next) : String(Number(next.toFixed(3)));
-  });
-}
-
-// Call these on load (works even if some buttons don't exist)
-document.addEventListener("DOMContentLoaded", () => {
-  wireStepper("repsMinus", "repsPlus", "repsInput", 1, 0);
-  wireStepper("durationMinus", "durationPlus", "durationInput", 1, 0);
-  wireStepper("weightMinus", "weightPlus", "weightInput", 0.1, 0);
-  wireStepper("distanceMinus", "distancePlus", "distanceInput", 0.001, 0);
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  renderEntries();
 
-
-
-
-
+  el("addBtn")?.addEventListener("click", addEntry);
+  el("exportBtn")?.addEventListener("click", generateExport);
+  el("copyBtn")?.addEventListener("click", copyExport);
+});
