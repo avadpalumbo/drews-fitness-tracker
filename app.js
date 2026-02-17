@@ -245,6 +245,45 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial render from storage
   renderEntries();
 });
+// --- Stepper buttons (+ / -) support ---
+// This will make + and - buttons work if they have ids like:
+// repsPlus / repsMinus, weightPlus / weightMinus, distancePlus / distanceMinus, durationPlus / durationMinus
+
+function wireStepper(minusId, plusId, inputId, step = 1, min = 0) {
+  const minusBtn = document.getElementById(minusId);
+  const plusBtn = document.getElementById(plusId);
+  const input = document.getElementById(inputId);
+
+  if (!minusBtn || !plusBtn || !input) return; // silently skip if not present
+
+  // Important: prevent buttons from submitting forms or reloading page
+  minusBtn.type = "button";
+  plusBtn.type = "button";
+
+  const getVal = () => {
+    const v = parseFloat(input.value);
+    return Number.isFinite(v) ? v : 0;
+  };
+
+  minusBtn.addEventListener("click", () => {
+    const next = Math.max(min, getVal() - step);
+    input.value = (step % 1 === 0) ? String(next) : String(Number(next.toFixed(3)));
+  });
+
+  plusBtn.addEventListener("click", () => {
+    const next = getVal() + step;
+    input.value = (step % 1 === 0) ? String(next) : String(Number(next.toFixed(3)));
+  });
+}
+
+// Call these on load (works even if some buttons don't exist)
+document.addEventListener("DOMContentLoaded", () => {
+  wireStepper("repsMinus", "repsPlus", "repsInput", 1, 0);
+  wireStepper("durationMinus", "durationPlus", "durationInput", 1, 0);
+  wireStepper("weightMinus", "weightPlus", "weightInput", 0.1, 0);
+  wireStepper("distanceMinus", "distancePlus", "distanceInput", 0.001, 0);
+});
+
 
 
 
