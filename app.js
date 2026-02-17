@@ -1,3 +1,4 @@
+alert("LIVE JS LOADED ✅");
 // ===== Drew’s Fitness Tracker =====
 // Full save + export + universal +/- stepper support
 
@@ -147,3 +148,4 @@ document.addEventListener("DOMContentLoaded", () => {
   el("exportBtn")?.addEventListener("click", generateExport);
   el("copyBtn")?.addEventListener("click", copyExport);
 });
+
