@@ -1,346 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drew's Fitness Tracker</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Drew’s Fitness Tracker</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<h1>Drew's Fitness Tracker</h1>
-<p id="status">App loading...</p>
+  <h1>Drew’s Fitness Tracker</h1>
 
-<div class="card">
-  <label>Date:</label>
-  <input type="date" id="date">
-</div>
+  <div class="card">
+    <label>Date:</label>
+    <input type="date" id="dateInput">
 
-<div class="card">
-  <h2>GTG Chin-ups</h2>
-  <button id="gtgBtn">Add GTG Set (uses default reps)</button>
+    <label>Type:</label>
+    <select id="typeInput">
+      <option>Calisthenics</option>
+      <option>Cardio</option>
+      <option>GTG Chin-ups</option>
+      <option>Fasted Weight</option>
+      <option>Nutrition</option>
+      <option>Note</option>
+    </select>
 
-  <div class="row">
-    <div class="field">
-      <label>Default GTG reps</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="gtgDefault" data-step="-1">−</button>
-        <div class="valueBox" id="gtgDefault">2</div>
-        <button type="button" class="btn" data-step-target="gtgDefault" data-step="1">+</button>
-      </div>
+    <label>Title:</label>
+    <input type="text" id="titleInput" placeholder="e.g. Chin-ups">
+
+    <label>Reps:</label>
+    <div class="stepper">
+      <button type="button" class="step-btn" data-target="repsInput" data-step="-1">-</button>
+      <input type="number" id="repsInput" min="0" step="1" value="0">
+      <button type="button" class="step-btn" data-target="repsInput" data-step="1">+</button>
     </div>
 
-    <div class="field">
-      <label>Feel</label>
-      <select id="gtgFeel">
-        <option>Easy</option>
-        <option selected>Normal</option>
-        <option>Grindy</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-<div class="card">
-  <h2>Cardio Walk (Hands-Free)</h2>
-
-  <div class="grid2">
-    <div class="field">
-      <label>Minutes</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cardioMin" data-step="-1">−</button>
-        <div class="valueBox" id="cardioMin">45</div>
-        <button type="button" class="btn" data-step-target="cardioMin" data-step="1">+</button>
-      </div>
+    <label>Weight (lbs):</label>
+    <div class="stepper">
+      <button type="button" class="step-btn" data-target="weightInput" data-step="-1">-</button>
+      <input type="number" id="weightInput" min="0" step="1" value="0">
+      <button type="button" class="step-btn" data-target="weightInput" data-step="1">+</button>
     </div>
 
-    <div class="field">
-      <label>Incline (+0.5)</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cardioIncline" data-step="-0.5">−</button>
-        <div class="valueBox" id="cardioIncline">4.0</div>
-        <button type="button" class="btn" data-step-target="cardioIncline" data-step="0.5">+</button>
-      </div>
+    <label>Distance (miles):</label>
+    <div class="stepper">
+      <button type="button" class="step-btn" data-target="distanceInput" data-step="-0.1">-</button>
+      <input type="number" id="distanceInput" min="0" step="0.1" value="0">
+      <button type="button" class="step-btn" data-target="distanceInput" data-step="0.1">+</button>
     </div>
 
-    <div class="field">
-      <label>Speed mph (+0.5)</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cardioSpeed" data-step="-0.5">−</button>
-        <div class="valueBox" id="cardioSpeed">3.5</div>
-        <button type="button" class="btn" data-step-target="cardioSpeed" data-step="0.5">+</button>
-      </div>
+    <label>Duration (minutes):</label>
+    <div class="stepper">
+      <button type="button" class="step-btn" data-target="durationInput" data-step="-1">-</button>
+      <input type="number" id="durationInput" min="0" step="1" value="0">
+      <button type="button" class="step-btn" data-target="durationInput" data-step="1">+</button>
     </div>
 
-    <div class="field">
-      <label>Distance (mi, +0.01)</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cardioDist" data-step="-0.01">−</button>
-        <div class="valueBox" id="cardioDist">2.00</div>
-        <button type="button" class="btn" data-step-target="cardioDist" data-step="0.01">+</button>
-      </div>
-    </div>
+    <label>Notes:</label>
+    <input type="text" id="notesInput" placeholder="Optional notes">
+
+    <br><br>
+    <button id="addBtn">Add Entry</button>
   </div>
 
-  <label class="checkRow">
-    <input type="checkbox" id="cardioCooldown">
-    Cooldown ramp-down
-  </label>
+  <h2>Workout Log</h2>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Title</th>
+        <th>Reps</th>
+        <th>Weight</th>
+        <th>Distance</th>
+        <th>Duration</th>
+        <th>Notes</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody id="entriesTbody"></tbody>
+  </table>
 
-  <button id="cardioBtn">Save Cardio Walk</button>
-</div>
-
-<div class="card">
-  <h2>Ruck (Backpack, Hands-Free)</h2>
-
-  <div class="grid2">
-    <div class="field">
-      <label>Minutes</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="ruckMin" data-step="-1">−</button>
-        <div class="valueBox" id="ruckMin">45</div>
-        <button type="button" class="btn" data-step-target="ruckMin" data-step="1">+</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Incline (+0.5)</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="ruckIncline" data-step="-0.5">−</button>
-        <div class="valueBox" id="ruckIncline">4.0</div>
-        <button type="button" class="btn" data-step-target="ruckIncline" data-step="0.5">+</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Speed (+0.5)</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="ruckSpeed" data-step="-0.5">−</button>
-        <div class="valueBox" id="ruckSpeed">3.5</div>
-        <button type="button" class="btn" data-step-target="ruckSpeed" data-step="0.5">+</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Distance (+0.01)</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="ruckDist" data-step="-0.01">−</button>
-        <div class="valueBox" id="ruckDist">2.00</div>
-        <button type="button" class="btn" data-step-target="ruckDist" data-step="0.01">+</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Load lbs (+5)</label>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="ruckLoad" data-step="-5">−</button>
-        <div class="valueBox" id="ruckLoad">25</div>
-        <button type="button" class="btn" data-step-target="ruckLoad" data-step="5">+</button>
-      </div>
-    </div>
-  </div>
-
-  <button id="ruckBtn">Save Ruck Walk</button>
-</div>
-
-<div class="card">
-  <h2>Calisthenics Session (Combined)</h2>
-  <label class="checkRow">
-    <input type="checkbox" id="calToFailure" checked>
-    Sets to failure (default ON)
-  </label>
-
-  <div class="calTable">
-    <!-- template row: reps stepper + weighted checkbox + weight stepper (hidden unless checked) -->
-
-    <div class="calRow">
-      <div class="calName">Chin-ups</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_chins" data-step="-1">−</button>
-        <div class="valueBox" id="cal_chins">4</div>
-        <button type="button" class="btn" data-step-target="cal_chins" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_chins_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_chins_w_box">
-        <button type="button" class="btn" data-step-target="cal_chins_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_chins_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_chins_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">Dips</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_dips" data-step="-1">−</button>
-        <div class="valueBox" id="cal_dips">18</div>
-        <button type="button" class="btn" data-step-target="cal_dips" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_dips_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_dips_w_box">
-        <button type="button" class="btn" data-step-target="cal_dips_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_dips_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_dips_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">Parallette push-ups</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_ppush" data-step="-1">−</button>
-        <div class="valueBox" id="cal_ppush">20</div>
-        <button type="button" class="btn" data-step-target="cal_ppush" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_ppush_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_ppush_w_box">
-        <button type="button" class="btn" data-step-target="cal_ppush_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_ppush_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_ppush_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">Incline parallette push-ups</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_ippush" data-step="-1">−</button>
-        <div class="valueBox" id="cal_ippush">0</div>
-        <button type="button" class="btn" data-step-target="cal_ippush" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_ippush_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_ippush_w_box">
-        <button type="button" class="btn" data-step-target="cal_ippush_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_ippush_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_ippush_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">Rows (feet elevated)</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_rows_e" data-step="-1">−</button>
-        <div class="valueBox" id="cal_rows_e">7</div>
-        <button type="button" class="btn" data-step-target="cal_rows_e" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_rows_e_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_rows_e_w_box">
-        <button type="button" class="btn" data-step-target="cal_rows_e_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_rows_e_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_rows_e_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">Rows (feet on floor)</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_rows_f" data-step="-1">−</button>
-        <div class="valueBox" id="cal_rows_f">9</div>
-        <button type="button" class="btn" data-step-target="cal_rows_f" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_rows_f_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_rows_f_w_box">
-        <button type="button" class="btn" data-step-target="cal_rows_f_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_rows_f_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_rows_f_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">Squats</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_squats" data-step="-1">−</button>
-        <div class="valueBox" id="cal_squats">20</div>
-        <button type="button" class="btn" data-step-target="cal_squats" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_squats_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_squats_w_box">
-        <button type="button" class="btn" data-step-target="cal_squats_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_squats_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_squats_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">Hanging knee raises</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_knees" data-step="-1">−</button>
-        <div class="valueBox" id="cal_knees">10</div>
-        <button type="button" class="btn" data-step-target="cal_knees" data-step="1">+</button>
-      </div>
-      <label class="miniCheck">
-        <input type="checkbox" class="wCheck" data-wtarget="cal_knees_w">
-        Weighted?
-      </label>
-      <div class="stepper wBox" id="cal_knees_w_box">
-        <button type="button" class="btn" data-step-target="cal_knees_w" data-step="-5">−</button>
-        <div class="valueBox" id="cal_knees_w">0</div>
-        <button type="button" class="btn" data-step-target="cal_knees_w" data-step="5">+</button>
-      </div>
-    </div>
-
-    <div class="calRow">
-      <div class="calName">DB curls (hammer + alternating)</div>
-      <div class="stepper">
-        <button type="button" class="btn" data-step-target="cal_curls" data-step="-1">−</button>
-        <div class="valueBox" id="cal_curls">10</div>
-        <button type="button" class="btn" data-step-target="cal_curls" data-step="1">+</button>
-      </div>
-      <div class="field">
-        <label style="margin:0; font-size:12px;">DB Weight</label>
-        <div class="rowTight">
-          <button type="button" class="chipBtn" data-set="cal_curls_w" data-value="25">25</button>
-          <button type="button" class="chipBtn" data-set="cal_curls_w" data-value="35">35</button>
-          <div class="valueMini">Selected: <span id="cal_curls_w">25</span> lb</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <button id="calisBtn">Save Calisthenics Session</button>
-</div>
-
-<div class="card">
-  <h2>Fasted Weight</h2>
-  <div class="stepper">
-    <button type="button" class="btn" data-step-target="fastedWeight" data-step="-0.1">−</button>
-    <div class="valueBox" id="fastedWeight">208.6</div>
-    <button type="button" class="btn" data-step-target="fastedWeight" data-step="0.1">+</button>
-  </div>
-
-  <button id="weightBtn">Save Fasted Weight</button>
-</div>
-
-<div class="card">
-  <h2>Today's Entries</h2>
-  <ul id="entries"></ul>
-</div>
-
-<div class="card">
-  <h2>Export for ChatGPT</h2>
+  <h2>Export</h2>
   <button id="exportBtn">Generate Export</button>
-  <textarea id="exportBox" rows="12"></textarea>
-</div>
+  <button id="copyBtn">Copy Export</button>
+  <br><br>
+  <textarea id="exportBox" rows="10" style="width:100%;"></textarea>
 
-<script src="app.js?v=20260217b"></script>
+  <!-- IMPORTANT: cache-busted script -->
+  <script src="app.js?v=4"></script>
 </body>
 </html>
 
