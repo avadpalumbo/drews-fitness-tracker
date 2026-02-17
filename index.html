@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Drew’s Fitness Tracker</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,203 +13,98 @@
   <!-- FASTED WEIGHT -->
   <div class="card">
     <h2>Fasted Weight</h2>
-    <div class="row">
-      <label>Date</label>
-      <input type="date" id="fwDate">
+    <input type="date" id="fwDate">
+    <div class="stepper">
+      <button class="step-btn" data-target="fwWeight" data-step="-0.1">-</button>
+      <input type="number" id="fwWeight" min="0" step="0.1" value="0">
+      <button class="step-btn" data-target="fwWeight" data-step="0.1">+</button>
     </div>
-
-    <div class="row">
-      <label>Weight (lbs)</label>
-      <div class="stepper">
-        <button type="button" class="step-btn" data-target="fwWeight" data-step="-0.1">-</button>
-        <input type="number" id="fwWeight" min="0" step="0.1" value="0">
-        <button type="button" class="step-btn" data-target="fwWeight" data-step="0.1">+</button>
-      </div>
-    </div>
-
     <button id="saveFastedWeightBtn">Save Fasted Weight</button>
   </div>
 
   <!-- CARDIO -->
   <div class="card">
     <h2>Cardio Walk</h2>
-    <div class="row">
-      <label>Date</label>
-      <input type="date" id="cardioDate">
+    <input type="date" id="cardioDate">
+    <label>Minutes</label>
+    <div class="stepper">
+      <button class="step-btn" data-target="cardioMinutes" data-step="-1">-</button>
+      <input type="number" id="cardioMinutes" min="0" step="1" value="0">
+      <button class="step-btn" data-target="cardioMinutes" data-step="1">+</button>
     </div>
 
-    <div class="row">
-      <label>Minutes</label>
-      <div class="stepper">
-        <button type="button" class="step-btn" data-target="cardioMinutes" data-step="-1">-</button>
-        <input type="number" id="cardioMinutes" min="0" step="1" value="0">
-        <button type="button" class="step-btn" data-target="cardioMinutes" data-step="1">+</button>
-      </div>
+    <label>Miles</label>
+    <div class="stepper">
+      <button class="step-btn" data-target="cardioMiles" data-step="-0.01">-</button>
+      <input type="number" id="cardioMiles" min="0" step="0.01" value="0">
+      <button class="step-btn" data-target="cardioMiles" data-step="0.01">+</button>
     </div>
 
-    <div class="row">
-      <label>Distance (miles)</label>
-      <div class="stepper">
-        <button type="button" class="step-btn" data-target="cardioMiles" data-step="-0.01">-</button>
-        <input type="number" id="cardioMiles" min="0" step="0.01" value="0">
-        <button type="button" class="step-btn" data-target="cardioMiles" data-step="0.01">+</button>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>Incline (optional)</label>
-      <input type="text" id="cardioIncline" placeholder="e.g., 4.0 then cooldown">
-    </div>
-
-    <div class="row">
-      <label>Speed (optional)</label>
-      <input type="text" id="cardioSpeed" placeholder="e.g., 3.7 then tapered">
-    </div>
-
-    <div class="row">
-      <label>Notes</label>
-      <input type="text" id="cardioNotes" placeholder="hands-free, ruck, etc.">
-    </div>
-
+    <input type="text" id="cardioNotes" placeholder="Incline, speed, hands free, etc">
     <button id="saveCardioBtn">Save Cardio</button>
-  </div>
-
-  <!-- RUCK -->
-  <div class="card">
-    <h2>Ruck</h2>
-    <div class="row">
-      <label>Date</label>
-      <input type="date" id="ruckDate">
-    </div>
-
-    <div class="row">
-      <label>Weight (lbs)</label>
-      <div class="stepper">
-        <button type="button" class="step-btn" data-target="ruckWeight" data-step="-1">-</button>
-        <input type="number" id="ruckWeight" min="0" step="1" value="0">
-        <button type="button" class="step-btn" data-target="ruckWeight" data-step="1">+</button>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>Minutes</label>
-      <div class="stepper">
-        <button type="button" class="step-btn" data-target="ruckMinutes" data-step="-1">-</button>
-        <input type="number" id="ruckMinutes" min="0" step="1" value="0">
-        <button type="button" class="step-btn" data-target="ruckMinutes" data-step="1">+</button>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>Distance (miles)</label>
-      <div class="stepper">
-        <button type="button" class="step-btn" data-target="ruckMiles" data-step="-0.01">-</button>
-        <input type="number" id="ruckMiles" min="0" step="0.01" value="0">
-        <button type="button" class="step-btn" data-target="ruckMiles" data-step="0.01">+</button>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>Notes</label>
-      <input type="text" id="ruckNotes" placeholder="e.g., 26lb KB carry last 15 min">
-    </div>
-
-    <button id="saveRuckBtn">Save Ruck</button>
   </div>
 
   <!-- CALISTHENICS / GTG -->
   <div class="card">
     <h2>Calisthenics / GTG</h2>
-    <div class="row">
-      <label>Date</label>
-      <input type="date" id="workoutDate">
-    </div>
-    <p style="opacity:.8;margin-top:6px;">Tap +/− for reps. Leave at 0 if you didn’t do it.</p>
+    <input type="date" id="workoutDate">
 
-    <div class="exercise-grid">
+    <p>Tap + / − to log reps</p>
 
-      <!-- Each row: name + reps stepper + optional weight + optional notes -->
-      <div class="exercise-row">
-        <div class="exercise-name">Chin-ups</div>
-        <div class="stepper">
-          <button type="button" class="step-btn" data-target="ex_chinups" data-step="-1">-</button>
-          <input type="number" id="ex_chinups" min="0" step="1" value="0" data-exname="Chin-ups">
-          <button type="button" class="step-btn" data-target="ex_chinups" data-step="1">+</button>
-        </div>
-        <input type="text" id="ex_chinups_notes" placeholder="notes (GTG / pause / negatives)">
-      </div>
-
-      <div class="exercise-row">
-        <div class="exercise-name">Dips</div>
-        <div class="stepper">
-          <button type="button" class="step-btn" data-target="ex_dips" data-step="-1">-</button>
-          <input type="number" id="ex_dips" min="0" step="1" value="0" data-exname="Dips">
-          <button type="button" class="step-btn" data-target="ex_dips" data-step="1">+</button>
-        </div>
-        <input type="text" id="ex_dips_notes" placeholder="notes (controlled / weighted later)">
-      </div>
-
-      <div class="exercise-row">
-        <div class="exercise-name">Parallette Push-ups</div>
-        <div class="stepper">
-          <button type="button" class="step-btn" data-target="ex_parpush" data-step="-1">-</button>
-          <input type="number" id="ex_parpush" min="0" step="1" value="0" data-exname="Parallette Push-ups">
-          <button type="button" class="step-btn" data-target="ex_parpush" data-step="1">+</button>
-        </div>
-        <input type="text" id="ex_parpush_notes" placeholder="notes (feet elevated? floor?)">
-      </div>
-
-      <div class="exercise-row">
-        <div class="exercise-name">Inverted Rows (feet elevated)</div>
-        <div class="stepper">
-          <button type="button" class="step-btn" data-target="ex_invrow_elev" data-step="-1">-</button>
-          <input type="number" id="ex_invrow_elev" min="0" step="1" value="0" data-exname="Inverted Rows (Feet Elevated)">
-          <button type="button" class="step-btn" data-target="ex_invrow_elev" data-step="1">+</button>
-        </div>
-        <input type="text" id="ex_invrow_elev_notes" placeholder="notes (palms in / close grip)">
-      </div>
-
-      <div class="exercise-row">
-        <div class="exercise-name">Inverted Rows (feet on floor)</div>
-        <div class="stepper">
-          <button type="button" class="step-btn" data-target="ex_invrow_floor" data-step="-1">-</button>
-          <input type="number" id="ex_invrow_floor" min="0" step="1" value="0" data-exname="Inverted Rows (Feet on Floor)">
-          <button type="button" class="step-btn" data-target="ex_invrow_floor" data-step="1">+</button>
-        </div>
-        <input type="text" id="ex_invrow_floor_notes" placeholder="notes">
-      </div>
-
-      <div class="exercise-row">
-        <div class="exercise-name">Squats (bodyweight)</div>
-        <div class="stepper">
-          <button type="button" class="step-btn" data-target="ex_squats" data-step="-1">-</button>
-          <input type="number" id="ex_squats" min="0" step="1" value="0" data-exname="Squats (Bodyweight)">
-          <button type="button" class="step-btn" data-target="ex_squats" data-step="1">+</button>
-        </div>
-        <input type="text" id="ex_squats_notes" placeholder="notes (to failure?)">
-      </div>
-
-      <div class="exercise-row">
-        <div class="exercise-name">Hanging Knee Raises</div>
-        <div class="stepper">
-          <button type="button" class="step-btn" data-target="ex_kneeraises" data-step="-1">-</button>
-          <input type="number" id="ex_kneeraises" min="0" step="1" value="0" data-exname="Hanging Knee Raises">
-          <button type="button" class="step-btn" data-target="ex_kneeraises" data-step="1">+</button>
-        </div>
-        <input type="text" id="ex_kneeraises_notes" placeholder="notes">
-      </div>
-
+    <div class="exercise">
+      <span>Chin-ups</span>
+      <button class="step-btn" data-target="chinups" data-step="-1">-</button>
+      <input type="number" id="chinups" min="0" step="1" value="0" data-ex="Chin-ups">
+      <button class="step-btn" data-target="chinups" data-step="1">+</button>
     </div>
 
-    <div class="row">
-      <label>Session Notes</label>
-      <input type="text" id="sessionNotes" placeholder="e.g., all sets to failure, 2 min rest between sets">
+    <div class="exercise">
+      <span>Dips</span>
+      <button class="step-btn" data-target="dips" data-step="-1">-</button>
+      <input type="number" id="dips" min="0" step="1" value="0" data-ex="Dips">
+      <button class="step-btn" data-target="dips" data-step="1">+</button>
     </div>
 
-    <button id="saveWorkoutBtn">Save Calisthenics/GTG</button>
+    <div class="exercise">
+      <span>Parallette Push-ups</span>
+      <button class="step-btn" data-target="pushups" data-step="-1">-</button>
+      <input type="number" id="pushups" min="0" step="1" value="0" data-ex="Parallette Push-ups">
+      <button class="step-btn" data-target="pushups" data-step="1">+</button>
+    </div>
+
+    <div class="exercise">
+      <span>Inverted Rows (Elevated)</span>
+      <button class="step-btn" data-target="rowsElev" data-step="-1">-</button>
+      <input type="number" id="rowsElev" min="0" step="1" value="0" data-ex="Inverted Rows Elevated">
+      <button class="step-btn" data-target="rowsElev" data-step="1">+</button>
+    </div>
+
+    <div class="exercise">
+      <span>Inverted Rows (Floor)</span>
+      <button class="step-btn" data-target="rowsFloor" data-step="-1">-</button>
+      <input type="number" id="rowsFloor" min="0" step="1" value="0" data-ex="Inverted Rows Floor">
+      <button class="step-btn" data-target="rowsFloor" data-step="1">+</button>
+    </div>
+
+    <div class="exercise">
+      <span>Squats</span>
+      <button class="step-btn" data-target="squats" data-step="-1">-</button>
+      <input type="number" id="squats" min="0" step="1" value="0" data-ex="Squats">
+      <button class="step-btn" data-target="squats" data-step="1">+</button>
+    </div>
+
+    <div class="exercise">
+      <span>Hanging Knee Raises</span>
+      <button class="step-btn" data-target="kneeraises" data-step="-1">-</button>
+      <input type="number" id="kneeraises" min="0" step="1" value="0" data-ex="Hanging Knee Raises">
+      <button class="step-btn" data-target="kneeraises" data-step="1">+</button>
+    </div>
+
+    <button id="saveWorkoutBtn">Save Calisthenics Workout</button>
   </div>
 
-  <h2>Saved Log</h2>
+  <!-- LOG TABLE -->
+  <h2>Workout Log</h2>
   <table border="1" width="100%">
     <thead>
       <tr>
@@ -221,19 +116,16 @@
         <th>Distance</th>
         <th>Minutes</th>
         <th>Notes</th>
-        <th>Delete</th>
       </tr>
     </thead>
     <tbody id="entriesTbody"></tbody>
   </table>
 
-  <h2>Export → Copy → Paste to Chat</h2>
+  <h2>Export</h2>
   <button id="exportBtn">Generate Export</button>
   <button id="copyBtn">Copy Export</button>
-  <br><br>
-  <textarea id="exportBox" rows="12" style="width:100%;"></textarea>
+  <textarea id="exportBox" rows="10" style="width:100%;"></textarea>
 
-  <!-- Cache-bust so iPhone always loads latest JS -->
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
